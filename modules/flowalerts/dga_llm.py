@@ -6,21 +6,23 @@ import torch
 import requests
 import json
 import time
+import sys
 
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, matthews_corrcoef
 import numpy as np
 
 startTime = time.time() 
 # URL of the raw CSV file
-data_url = 'https://raw.githubusercontent.com/hmaccelerate/DGA_Detection/master/data/mixed_domain.csv'
+# data_url = 'https://raw.githubusercontent.com/hmaccelerate/DGA_Detection/master/data/mixed_domain.csv'
 
 try:
     
-    # Read the CSV file directly from the URL
-    df = pd.read_csv(data_url)
+    # Read the CSV file directly from the directory, url not working from local machine
+    df = pd.read_csv('mixed_domain.csv')
     print('Data Loaded successfully from github repository...')
 except Exception:
     print('Error in data loading. Please run the program again..')
+    sys.exit(1)
 
 # Display the first few rows of the DataFrame
 print('DataFrame shape :', df.shape)
