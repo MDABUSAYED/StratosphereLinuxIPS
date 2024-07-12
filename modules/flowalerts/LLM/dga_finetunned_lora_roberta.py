@@ -130,7 +130,7 @@ def tokenize_function(examples):
 
     return tokenized_inputs
 
-tokenized_dataset = dataset.map(tokenize_function, batched=True)
+tokenized_dataset = dataset.map(tokenize_function, batched=True, remove_columns=['text'])
 print("Tokenized Dataset : ", tokenized_dataset)
 
 # create data collator
