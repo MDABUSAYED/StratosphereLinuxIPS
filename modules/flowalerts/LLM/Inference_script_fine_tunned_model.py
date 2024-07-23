@@ -18,6 +18,7 @@ from transformers import (
     AutoModelForSequenceClassification,
     DataCollatorWithPadding,
     TrainingArguments,
+    BitsAndBytesConfig,
     Trainer)
 
 from peft import PeftModel, PeftConfig, get_peft_model, LoraConfig
@@ -26,7 +27,10 @@ import torch
 import numpy as np
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, matthews_corrcoef
 
-
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,  # Enable 4-bit quantization
+    bnb_4bit_compute_dtype=torch.bfloat16  # Set compute dtype to bfloat16
+)
 
 
 startTime = time.time() 
@@ -70,19 +74,28 @@ model_id = int(input("Enter number for different fine-tunned model \n 1 for lora
 
 if model_id == 1:
     model_name = './Roberta-Base-TrainedModel'
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2, id2label=id2label, label2id=label2id)
 elif model_id == 2:
     model_name = './Distilbert-Base-TrainedModel'
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2, id2label=id2label, label2id=label2id)
 elif model_id == 3:
     model_name = './Meta-Llama-3-8B-TrainedModel'
+    model = AutoModelForSequenceClassification.from_pretrained(model_name,quantization_config=bnb_config,\
+                                    num_labels=2, id2label=id2label,label2id=label2id, device_map="auto")
+    
 elif model_id == 4:
     model_name = './Zephyr-7B-Beta-TrainedModel'
+    model = AutoModelForSequenceClassification.from_pretrained(model_name,quantization_config=bnb_config,\
+                                    num_labels=2, id2label=id2label,label2id=label2id, device_map="auto")
 
-model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2, id2label=id2label, label2id=label2id)
+
 print('Model Description: ', model)
 
 #print('Model trainable parameteres : ', model.print_trainable_parameters())
 
 tokenizer = AutoTokenizer.from_pretrained(model_name, add_prefix_space=True)
+
+model.config.pad_token_id = model.config.eos_token_id
 
 clf = pipeline("text-classification", model=model, tokenizer=tokenizer)
 
@@ -201,5 +214,4 @@ results = trainer.evaluate()
 print(results)
 
 print("Total time taken in seconds = ", str(time.time() - startTime))
-
 
